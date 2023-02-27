@@ -1,6 +1,11 @@
 pipeline {
+    
+       parameters {
+        booleanParam(name: 'autoApprove', defaultValue: false, description: 'Automatically run apply after generating plan?')
+    } 
     agent any
 
+       
     stages {
         stage('checkout') {
             steps {
@@ -12,6 +17,21 @@ pipeline {
                 sh ('terraform init') 
             }
         }
+        stage('Approval') {
+           when {
+               not {
+                   equals expected: true, actual: params.autoApprove
+               }
+           }
+
+           steps {
+               script {
+                    input message: "Do you want to apply the plan?"
+                    
+               }
+           }
+       }
+       
         stage ("terraform Action") {
             steps {
                 echo "Terraform action is --> ${action}"
